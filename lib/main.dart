@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,10 @@ void main() async {
   runApp(const MyApp());
 
   await Firebase.initializeApp();
+
+  FirebaseFirestore.instance.collection('mensagens').snapshots().listen((msgs) {
+    msgs.docs.forEach((doc) => print(doc.data()));
+  });
 
   QuerySnapshot snapshot = await FirebaseFirestore.instance
       .collection('mensagens')
