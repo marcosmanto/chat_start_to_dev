@@ -1,12 +1,12 @@
 // ignore_for_file: avoid_print
 
 import 'package:chat_start_to_dev/pages/chat_page.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
   runApp(const MyApp());
+  await Firebase.initializeApp();
 }
 
 class MyApp extends StatelessWidget {
