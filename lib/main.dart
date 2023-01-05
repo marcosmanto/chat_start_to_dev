@@ -7,12 +7,19 @@ void main() async {
 
   await Firebase.initializeApp();
 
-  QuerySnapshot snapshot = await FirebaseFirestore.instance
+  /*QuerySnapshot snapshot = await FirebaseFirestore.instance
       .collection('mensagens')
       .orderBy('time', descending: false)
       .get();
   List docs = snapshot.docs.map((doc) => doc.data()).toList();
-  print(docs);
+  print(docs);*/
+
+  DocumentSnapshot snapshot = await FirebaseFirestore.instance
+      .collection('mensagens')
+      .doc('PwRqMMY3Z133R1ZSOYxr')
+      .get();
+  print(snapshot.data());
+  print(snapshot.id);
 }
 
 class MyApp extends StatelessWidget {
