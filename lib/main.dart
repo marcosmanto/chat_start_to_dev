@@ -4,9 +4,13 @@ import 'package:chat_start_to_dev/pages/chat_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() async {
+void main() {
   runApp(const MyApp());
-  await Firebase.initializeApp();
+}
+
+Future<FirebaseApp> _init() async {
+  await Future.delayed(Duration(seconds: 5));
+  return Firebase.initializeApp();
 }
 
 class MyApp extends StatelessWidget {
@@ -20,6 +24,20 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
             primarySwatch: Colors.blue,
             iconTheme: IconThemeData(color: Colors.blue)),
-        home: ChatPage());
+        home: Scaffold(
+          backgroundColor: Colors.lightBlue.shade100,
+          body: FutureBuilder(
+              future: _init(),
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.none:
+                  case ConnectionState.waiting:
+                    return Center(child: CircularProgressIndicator());
+                  case ConnectionState.done:
+                  case ConnectionState.active:
+                    return ChatPage();
+                }
+              }),
+        ));
   }
 }
