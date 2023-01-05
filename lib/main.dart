@@ -9,8 +9,18 @@ void main() async {
 
   await Firebase.initializeApp();
 
-  FirebaseFirestore.instance.collection('mensagens').snapshots().listen((msgs) {
+  // Listen to a collection
+  /*FirebaseFirestore.instance.collection('mensagens').snapshots().listen((msgs) {
     msgs.docs.forEach((doc) => print(doc.data()));
+  });*/
+
+  // Listen to a specific document
+  FirebaseFirestore.instance
+      .collection('mensagens')
+      .doc('0bfjglLd47egwZwGNfkb')
+      .snapshots()
+      .listen((doc) {
+    print(doc.data());
   });
 
   QuerySnapshot snapshot = await FirebaseFirestore.instance
