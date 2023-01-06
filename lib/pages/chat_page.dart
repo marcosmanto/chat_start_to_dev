@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../widgets/chat_message.dart';
+
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
 
@@ -79,8 +81,9 @@ class _ChatPageState extends State<ChatPage> {
                           itemCount: documents.length,
                           reverse: true,
                           itemBuilder: (context, index) {
-                            return ListTile(
-                              title: Text(documents[index].data()['text']),
+                            return ChatMessage(
+                              message: documents[index].data(),
+                              mine: true,
                             );
                           },
                         );
