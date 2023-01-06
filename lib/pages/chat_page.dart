@@ -21,12 +21,8 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   double? _snackPosition;
+  bool _isLoading = false;
   final GoogleSignIn googleSignIn = GoogleSignIn();
-  final AppBar appBar = AppBar(
-    elevation: 0,
-    title: const Text('Olá'),
-    centerTitle: true,
-  );
   //User? _currentUser;
 
   @override
@@ -49,15 +45,28 @@ class _ChatPageState extends State<ChatPage> {
 
     return SafeArea(
       child: Scaffold(
-        appBar: appBar,
+        appBar: AppBar(
+          elevation: 0,
+          title: Text(FirebaseAuth.instance.currentUser != null
+              ? 'Olá, ${FirebaseAuth.instance.currentUser!.displayName}'
+              : 'Chat App'),
+          centerTitle: true,
+          actions: [
+            FirebaseAuth.instance.currentUser != null
+                ? IconButton(
+                    onPressed: () async {
+                      await FirebaseAuth.instance.signOut();
+                      await googleSignIn.signOut();
+                      _displaySnack('Você saiu com sucesso.');
+                      setState(() {});
+                    },
+                    icon: Icon(Icons.exit_to_app),
+                  )
+                : Container()
+          ],
+        ),
         body: Column(
           children: [
-            ElevatedButton(
-                onPressed: () async {
-                  await googleSignIn.disconnect();
-                  await FirebaseAuth.instance.signOut();
-                },
-                child: Text('Logout')),
             Expanded(
               child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: FirebaseFirestore.instance
@@ -83,7 +92,8 @@ class _ChatPageState extends State<ChatPage> {
                           itemBuilder: (context, index) {
                             return ChatMessage(
                               message: documents[index].data(),
-                              mine: true,
+                              mine: documents[index].data()['uid'] ==
+                                  FirebaseAuth.instance.currentUser?.uid,
                             );
                           },
                         );
@@ -92,7 +102,9 @@ class _ChatPageState extends State<ChatPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Nenhuma mensagem ainda'),
+                              Text(FirebaseAuth.instance.currentUser != null
+                                  ? 'Nenhuma mensagem ainda'
+                                  : 'Faça login para ver as mensagens'),
                               Icon(Icons.sentiment_satisfied_alt)
                             ],
                           ),
@@ -102,9 +114,12 @@ class _ChatPageState extends State<ChatPage> {
                 },
               ),
             ),
-            TextComposer(
-              onSendMessage: _sendMessage,
-            ),
+            if (_isLoading)
+              LinearProgressIndicator()
+            else
+              TextComposer(
+                onSendMessage: _sendMessage,
+              ),
           ],
         ),
       ),
@@ -164,11 +179,14 @@ class _ChatPageState extends State<ChatPage> {
     if (img != null) {
       UploadTask task = FirebaseStorage.instance
           .ref()
-          .child(DateTime.now().millisecondsSinceEpoch.toString())
+          .child(
+              '${user.uid}_${DateTime.now().millisecondsSinceEpoch.toString()}')
           .putFile(File(img.path));
+      setState(() => _isLoading = true);
       TaskSnapshot taskSnapshot = await task.whenComplete(() => null);
       String url = await taskSnapshot.ref.getDownloadURL();
       data['imgUrl'] = url;
+      setState(() => _isLoading = false);
     }
 
     data['text'] = text;
