@@ -8,10 +8,10 @@ void main() {
   runApp(const MyApp());
 }
 
-Future<FirebaseApp> _init() async {
+/*Future<FirebaseApp> _init() async {
   await Future.delayed(Duration(seconds: 5));
   return Firebase.initializeApp();
-}
+}*/
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -25,9 +25,9 @@ class MyApp extends StatelessWidget {
             primarySwatch: Colors.blue,
             iconTheme: IconThemeData(color: Colors.blue)),
         home: Scaffold(
-          backgroundColor: Colors.lightBlue.shade100,
+          backgroundColor: Color.fromARGB(255, 224, 245, 255),
           body: FutureBuilder(
-              future: _init(),
+              future: Firebase.initializeApp(),
               builder: (context, snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.none:
