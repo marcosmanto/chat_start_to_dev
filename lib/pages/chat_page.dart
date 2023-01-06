@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 
 import 'package:chat_start_to_dev/widgets/text_composer.dart';
@@ -16,7 +18,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  late final double _snackPosition;
+  double? _snackPosition;
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final AppBar appBar = AppBar(
     elevation: 0,
@@ -29,15 +31,19 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
 
-    /*FirebaseAuth.instance.authStateChanges().listen((user) {
-      _currentUser = user;
-    });*/
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user != null) {
+        print('user already logged');
+        // TODO: recheck user when screen builds
+        print(user);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     print('build');
-    _snackPosition = MediaQuery.of(context).size.height - 120;
+    _snackPosition = _snackPosition ?? MediaQuery.of(context).size.height - 120;
 
     return SafeArea(
       child: Scaffold(
@@ -48,7 +54,6 @@ class _ChatPageState extends State<ChatPage> {
                 onPressed: () async {
                   await googleSignIn.disconnect();
                   await FirebaseAuth.instance.signOut();
-                  print(FirebaseAuth.instance.currentUser);
                 },
                 child: Text('Logout')),
             Expanded(
@@ -67,7 +72,9 @@ class _ChatPageState extends State<ChatPage> {
                     default:
                       var documents = snapshot.data?.docs;
 
-                      if (documents != null && documents.isNotEmpty) {
+                      if (FirebaseAuth.instance.currentUser != null &&
+                          documents != null &&
+                          documents.isNotEmpty) {
                         return ListView.builder(
                           itemCount: documents.length,
                           reverse: true,
@@ -109,7 +116,8 @@ class _ChatPageState extends State<ChatPage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadiusDirectional.circular(16),
         ),
-        margin: EdgeInsets.only(bottom: _snackPosition, right: 20, left: 20),
+        margin:
+            EdgeInsets.only(bottom: _snackPosition ?? 0, right: 20, left: 20),
         backgroundColor: Colors.red,
         content: Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -189,6 +197,8 @@ class _ChatPageState extends State<ChatPage> {
             await FirebaseAuth.instance.signInWithCredential(authCredential);
 
         user = userCredential.user;
+        // rebuild screen to show the messages for authenticated user
+        setState(() {});
       } else {
         user = null;
       }
